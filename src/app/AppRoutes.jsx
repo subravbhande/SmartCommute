@@ -6,10 +6,10 @@ import MainLayout from "../components/layout/MainLayout";
 // Core pages
 import Dashboard from "../pages/Dashboard";
 import Planner from "../pages/Planner";
-import JourneyTimeline from "../pages/JourneyTimeline";
+import JourneyTimeline from "../pages/JourneyTimeLine";
 import LiveMonitoring from "../pages/LiveMonitoring";
 import Insights from "../pages/Insights";
-import WhyThisRoute from "../pages/WhyThisRoute";
+import WhyThisRoute from "../pages/whyThisRoute";
 import Architecture from "../pages/Architecture";
 
 // Utility pages

@@ -1,261 +1,186 @@
-import React, { useState } from "react";
-import { journeyStats, aiModels, insights } from "../data/demoData";
-import ProgressBar from "../components/comman/progressbar";
-import StatCard from "../components/comman/StatCard";
+import React, { useState, useEffect } from "react";
 import AutocompleteInput from "../components/comman/AutocompleteInput";
+import GeneratedJourney from "../components/journey/GeneratedJourney";
+import RewardsCard from "../components/rewards/RewardsCard";
+import StatCard from "../components/comman/StatCard";
+import { journeyStats } from "../data/demoData";
 
-/* -------- Dummy Generated Journey (Backend-like) -------- */
-const generatedJourney = {
-  from: "Andheri East",
-  to: "COEP Pune",
-  totalTime: "2h 45m",
-  totalCost: "₹420",
-  confidence: 91,
-  risk: "Medium",
-
-  segments: [
-    {
-      mode: "Walk",
-      from: "Home",
-      to: "Metro Station",
-      time: "8 min",
-      cost: "Free",
-      status: "On time",
-    },
-    {
-      mode: "Metro",
-      from: "Andheri East",
-      to: "Ghatkopar",
-      time: "18 min",
-      cost: "₹30",
-      status: "On time",
-    },
-    {
-      mode: "Local Train",
-      from: "Dadar",
-      to: "Pune",
-      time: "2h 10m",
-      cost: "₹120",
-      status: "5 min delay",
-    },
-    {
-      mode: "Cab",
-      from: "Pune Station",
-      to: "COEP",
-      time: "9 min",
-      cost: "₹270",
-      status: "Available",
-    },
-  ],
-
-  fallback: {
-    reason: "Train delay exceeds buffer time",
-    suggestion: "Switch to Express Bus",
-    newETA: "3h 05m",
-  },
-};
-
-const modeBadge = {
-  Walk: "bg-gray-100 text-gray-700",
-  Metro: "bg-blue-100 text-blue-700",
-  "Local Train": "bg-yellow-100 text-yellow-700",
-  Cab: "bg-purple-100 text-purple-700",
-};
+import {
+  FaRoute,
+  FaBell,
+  FaChartLine,
+  FaClock,
+  FaShieldAlt,
+  FaServer,
+  FaCalendarAlt,
+  FaClock as FaTime,
+} from "react-icons/fa";
 
 const Dashboard = () => {
   const [showJourney, setShowJourney] = useState(false);
+  const [preference, setPreference] = useState("Fastest");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+
+  // default today date
+  useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
+    setDate(today);
+  }, []);
 
   return (
-    <div className="space-y-20">
+    <div className="space-y-10">
 
-      {/* HEADER */}
-      <section>
-        <h1 className="text-3xl font-bold text-gray-800">
-          Good evening, commuter 👋
-        </h1>
-        <p className="text-gray-500 mt-1">
-          Plan smarter journeys with real-time intelligence
-        </p>
-      </section>
+      {/* PLAN JOURNEY + REWARDS */}
+      <section className="grid lg:grid-cols-3 gap-8">
 
-      {/* JOURNEY PLANNER */}
-      <section className="bg-white rounded-3xl shadow-xl p-8">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-xl font-semibold">Journey Planner</h2>
-          <span className="text-xs px-3 py-1 rounded-full bg-indigo-100 text-indigo-700">
-            AI Assisted
-          </span>
-        </div>
+        {/* LEFT */}
+        <div className="lg:col-span-2 bg-white rounded-3xl shadow p-6 space-y-6">
+          <h2 className="text-lg font-semibold">Plan Your Journey</h2>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <AutocompleteInput placeholder="From location" />
+          <AutocompleteInput placeholder="Starting Point" />
           <AutocompleteInput placeholder="Destination" />
-        </div>
 
-        <div className="flex gap-3 mt-6">
-          <button className="px-5 py-2 rounded-full bg-indigo-100 text-indigo-700 font-medium">
-            Fastest
-          </button>
-          <button className="px-5 py-2 rounded-full bg-gray-100 hover:bg-gray-200">
-            Cheapest
-          </button>
-          <button className="px-5 py-2 rounded-full bg-gray-100 hover:bg-gray-200">
-            Comfort
-          </button>
-        </div>
-
-        <button
-          onClick={() => setShowJourney(true)}
-          className="mt-8 w-full h-14 rounded-2xl
-          bg-gradient-to-r from-indigo-600 to-purple-600
-          text-white font-semibold text-lg
-          hover:scale-[1.02] transition"
-        >
-          Generate Journey →
-        </button>
-      </section>
-
-      {/* GENERATED JOURNEY */}
-      {showJourney && (
-        <section className="bg-white rounded-3xl shadow-xl p-8 animate-fadeIn">
-          <div className="flex flex-col md:flex-row justify-between gap-6 mb-8">
-            <div>
-              <h2 className="text-xl font-semibold">Generated Journey</h2>
-              <p className="text-sm text-gray-500">
-                {generatedJourney.from} → {generatedJourney.to}
-              </p>
+          {/* DATE & TIME */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative">
+              <FaCalendarAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500 text-sm" />
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full border rounded-xl h-12 pl-10 pr-4 text-sm
+                focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500"
+              />
             </div>
 
-            <div className="flex gap-8 text-sm">
-              <div>
-                <p className="text-gray-500">Total Time</p>
-                <p className="font-semibold">{generatedJourney.totalTime}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Estimated Cost</p>
-                <p className="font-semibold">{generatedJourney.totalCost}</p>
-              </div>
+            <div className="relative">
+              <FaTime className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500 text-sm" />
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="w-full border rounded-xl h-12 pl-10 pr-4 text-sm
+                focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500"
+              />
             </div>
           </div>
 
-          {/* SEGMENTS */}
-          <div className="space-y-4">
-            {generatedJourney.segments.map((s, i) => (
-              <div
-                key={i}
-                className="flex justify-between items-center p-5 rounded-2xl border hover:shadow transition"
+          {/* PREFERENCES */}
+          <div className="flex gap-3">
+            {["Fastest", "Cheapest", "Most Comfortable"].map((p) => (
+              <button
+                key={p}
+                onClick={() => setPreference(p)}
+                className={`px-4 py-1 rounded-full text-sm ${
+                  preference === p
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100"
+                }`}
               >
-                <div>
-                  <span
-                    className={`text-xs px-3 py-1 rounded-full ${modeBadge[s.mode]}`}
-                  >
-                    {s.mode}
-                  </span>
-
-                  <p className="text-sm font-medium mt-2">
-                    {s.from} → {s.to}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {s.time} • {s.cost}
-                  </p>
-                </div>
-
-                <span className="text-xs text-gray-600">
-                  {s.status}
-                </span>
-              </div>
+                {p}
+              </button>
             ))}
           </div>
 
-          {/* AI CONFIDENCE */}
-          <div className="mt-10 bg-indigo-50 rounded-2xl p-6">
-            <p className="text-sm font-medium">
-              AI Confidence: {generatedJourney.confidence}%
-            </p>
-            <ProgressBar value={generatedJourney.confidence} color="green" />
-            <p className="text-xs text-gray-600 mt-2">
-              Risk Level: {generatedJourney.risk}
-            </p>
-          </div>
-
-          {/* FALLBACK */}
-          <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
-            <p className="font-semibold text-sm">Fallback Ready</p>
-            <p className="text-sm text-gray-600 mt-1">
-              {generatedJourney.fallback.reason}
-            </p>
-            <p className="text-sm font-medium mt-2">
-              Suggested: {generatedJourney.fallback.suggestion}
-            </p>
-            <p className="text-xs text-gray-500">
-              Updated ETA: {generatedJourney.fallback.newETA}
-            </p>
-          </div>
-        </section>
-      )}
-
-      {/* LIVE CONDITIONS */}
-      <section>
-        <h2 className="text-xl font-semibold mb-6">
-          Live Urban Conditions
-        </h2>
-
-        <div className="grid md:grid-cols-4 gap-6">
-          <StatCard title="Traffic Density" value={`${journeyStats.trafficDensity}%`} color="yellow" />
-          <StatCard title="Crowd Level" value={`${journeyStats.crowdLevel}%`} color="yellow" />
-          <StatCard title="Weather" value={`${journeyStats.temperature}°C`} color="green" />
-          <StatCard title="Peak Hours" value={journeyStats.peakHours ? "Yes" : "No"} color="green" />
+          <button
+            onClick={() => setShowJourney(true)}
+            className="w-full h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium"
+          >
+            Plan Journey →
+          </button>
         </div>
+
+        {/* RIGHT */}
+        <RewardsCard />
       </section>
 
-      {/* AI MODELS */}
-      <section className="bg-white rounded-3xl shadow-xl p-8">
-        <h2 className="text-xl font-semibold mb-6">
-          AI Engines Running
-        </h2>
+      {/* GENERATED JOURNEY */}
+      {showJourney && <GeneratedJourney />}
 
-        <div className="space-y-5">
-          {aiModels.map((m, i) => (
-            <div key={i} className="p-5 rounded-2xl border hover:shadow transition">
-              <div className="flex justify-between items-center">
-                <p className="font-medium">{m.name}</p>
-                <span className="badge">{m.status}</span>
-              </div>
+      {/* LIVE FACTORS */}
+      <section className="grid md:grid-cols-4 gap-6">
+        <StatCard title="Traffic Density" value={`${journeyStats.trafficDensity}%`} />
+        <StatCard title="Crowd Level" value={`${journeyStats.crowdLevel}%`} />
+        <StatCard title="Weather" value={`${journeyStats.temperature}°C`} />
+        <StatCard title="Peak Hours" value={journeyStats.peakHours ? "Yes" : "No"} />
+      </section>
 
-              <p className="text-sm text-gray-500 mt-1">
-                Accuracy {m.accuracy}% • Latency {m.latency}
-              </p>
+      {/* EXTRA DASHBOARD SECTIONS */}
+      <section className="space-y-10">
 
-              <ProgressBar value={m.accuracy} color="green" />
+        {/* QUICK ACTIONS */}
+        <div className="bg-white rounded-3xl shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+
+          <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <div className="flex items-center gap-3 border rounded-xl p-4">
+              <FaRoute className="text-indigo-600 text-xl" />
+              <span>Re-plan Journey</span>
             </div>
-          ))}
+
+            <div className="flex items-center gap-3 border rounded-xl p-4">
+              <FaBell className="text-indigo-600 text-xl" />
+              <span>Set Delay Alerts</span>
+            </div>
+
+            <div className="flex items-center gap-3 border rounded-xl p-4">
+              <FaChartLine className="text-indigo-600 text-xl" />
+              <span>View Travel Insights</span>
+            </div>
+          </div>
         </div>
-      </section>
 
-      {/* AI INSIGHTS */}
-      <section>
-        <h2 className="text-xl font-semibold mb-6">AI Insights</h2>
+        {/* WHY SMARTCOMMUTE */}
+        <div className="bg-white rounded-3xl shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">Why SmartCommute</h3>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {insights.map((i, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-2xl p-6 shadow hover:-translate-y-1 transition"
-            >
-              <h3 className="font-semibold">{i.title}</h3>
-              <p className="text-sm text-gray-600 mt-2">{i.text}</p>
-
-              <div className="mt-4">
-                <ProgressBar value={i.confidence} color={i.color} />
-                <p className="text-xs text-gray-500 mt-1">
-                  Confidence {i.confidence}%
+          <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <div className="flex gap-3">
+              <FaClock className="text-green-600 text-xl" />
+              <div>
+                <p className="font-medium">Time Reliable</p>
+                <p className="text-gray-500">
+                  Buffer-based planning avoids surprises
                 </p>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
 
+            <div className="flex gap-3">
+              <FaShieldAlt className="text-green-600 text-xl" />
+              <div>
+                <p className="font-medium">Risk Aware</p>
+                <p className="text-gray-500">
+                  Crowd and delay prediction built-in
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <FaRoute className="text-green-600 text-xl" />
+              <div>
+                <p className="font-medium">Multi-Modal</p>
+                <p className="text-gray-500">
+                  Metro, train, bus, cab combined
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SYSTEM STATUS */}
+        <div className="bg-white rounded-3xl shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">System Status</h3>
+
+          <div className="flex items-center gap-4 text-sm">
+            <FaServer className="text-green-600 text-xl" />
+            <span className="text-gray-700">
+              All systems operational • Last updated 2 min ago
+            </span>
+          </div>
+        </div>
+
+      </section>
     </div>
   );
 };
